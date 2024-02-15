@@ -19,18 +19,81 @@ public class BankService
         _banks = mongoDatabase.GetCollection<Bank>(
             dbSettings.Value.BankCollectionName);
     }
+
+    public async Task InitVendingMachineCollections()
+    {
+        var coins = await GetAsync("Coins");
+        if (coins == null)
+        {
+            Console.Out.WriteLine("creating collection for Coins");
+            await CreateAsync(new Bank("Coins") );
+        }
+
+        var bank = await GetAsync("Bank");
+        if (bank == null)
+        {
+            Console.Out.WriteLine("creating collection for Bank");
+            await CreateAsync(new Bank("Bank") );
+        }
+
+        var returns = await GetAsync("Returns");
+        if (returns == null)
+        {
+            Console.Out.WriteLine("creating collection for Returns");
+            await CreateAsync(new Bank("Returns"));
+        }
+    }
+    
+    public async Task AddCoinToCollection(int coin, string collection)
+    {
+        await InitVendingMachineCollections();
+        var bank = await GetAsync(collection);
+        if (bank != null)
+        {
+            bank.Coins.Add(coin);
+            Console.Out.WriteLine("updating coins in " + collection + " adding " + coin + " now contains " + format(bank.Coins));
+            await UpdateAsync(bank.Id, bank);
+        }
+        else
+            throw new Exception("Internal error: no bank with name " + collection);
+    }    
+    
+    private string format(List<int> value)
+    {
+        return "[" + string.Join(", ", value) + "]";
+    }
+    
+    public async Task ClearCollection(string collection)
+    {
+        await InitVendingMachineCollections();
+        var coins = await GetAsync(collection);
+        if (coins == null)
+            return;
+        coins.Coins = new List<int>();
+        await UpdateAsync(coins.Id, coins);
+    }   
+    
+    public async Task RemoveCoinFromCollection(int coin, string name)
+    {
+        await InitVendingMachineCollections();
+        var coins = await GetAsync(name);
+        coins?.Coins.Remove(coin);
+        await UpdateAsync(coins.Id, coins);
+    }
+
     public async Task<List<Bank>> GetAsync() =>
         await _banks.Find(_ => true).ToListAsync();
 
-    public async Task<Bank?> GetAsync(string id) =>
-        await _banks.Find(x => x.Id == id).FirstOrDefaultAsync();
+    public async Task<Bank?> GetAsync(string name) =>
+        await _banks.Find(x => x.CoinCollectionName == name).FirstOrDefaultAsync();
 
-    public async Task CreateAsync(Bank newBook) =>
-        await _banks.InsertOneAsync(newBook);
+    public async Task CreateAsync(Bank newBank) =>
+        await _banks.InsertOneAsync(newBank);
 
-    public async Task UpdateAsync(string id, Bank updatedBook) =>
-        await _banks.ReplaceOneAsync(x => x.Id == id, updatedBook);
+    public async Task UpdateAsync(string id, Bank updatedBank) =>
+        await _banks.ReplaceOneAsync(x => x.Id == id, updatedBank);
 
     public async Task RemoveAsync(string id) =>
         await _banks.DeleteOneAsync(x => x.Id == id);
+
 }

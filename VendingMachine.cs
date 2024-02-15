@@ -10,7 +10,18 @@ public class VendingMachine
     private readonly ProductService _productService;
     public List<int> AcceptedCoins { get; protected set; } = new() { 5, 10, 25 };
     public List<int> Bank { get; } = new();
-    public List<int> Coins { get; } = new();
+    public async Task<List<int>> GetBank()
+    {
+        var collection = await _bankService.GetAsync("Bank");
+        return collection.Coins;
+    }
+
+    public async Task<List<int>> GetCoins()
+    {
+        var collection = await _bankService.GetAsync("Coins");
+        return collection.Coins;
+    }
+
     public string? DispensedProduct = "";
 
     protected Dictionary<string, int> _prices = new()
@@ -19,8 +30,14 @@ public class VendingMachine
     };
 
     private readonly CultureInfo _en_Us_Culture;
+    private readonly List<int> _coins = new();
 
     public List<int> Returns { get; protected set; } = new();
+    public async Task<List<int>> GetReturns()
+    {
+        var collection = await _bankService.GetAsync("Returns");
+        return collection.Coins;
+    }
     public string? SelectedProduct { get; set; }
     public Dictionary<string, int> Stock { get; private set; }
 
@@ -33,26 +50,32 @@ public class VendingMachine
 
         Display = "";
         Balance = 0;
+        Stock = new Dictionary<string, int>();
+        
         SelectedProduct = null;
         _en_Us_Culture = CultureInfo.CreateSpecificCulture("en-US");
         
 
-        DisplayBalance();
+        //DisplayBalance();
     }
 
     public string Display { get; protected set; }
     public int Balance { get; protected set; }
 
-    protected virtual void DisplayBalance()
+    protected virtual async void DisplayBalance()
     {
         if (Balance != 0)
         {
             Display = FormatAsDollars(Balance);
         }
-        else if (HasChange())
-            Display = "INSERT COIN";
         else
-            Display = "EXACT CHANGE ONLY";
+        {
+            var hasChange = await HasChange();
+            if (hasChange)
+                Display = "INSERT COIN";
+            else
+                Display = "EXACT CHANGE ONLY";
+        }
     }
 
     public virtual void InsertAllCoins(int[] coins)
@@ -63,17 +86,19 @@ public class VendingMachine
         }
     }
 
-    public virtual void InsertCoin(int coin)
+    public virtual async void InsertCoin(int coin)
     {
         if (AcceptedCoins.Contains(coin))
         {
-            Coins.Add(coin);
+            await _bankService.AddCoinToCollection(coin, "Coins");
+            //GetCoins().Add(coin);
             Balance += coin;
             DisplayBalance();
         }
         else
         {
-            Returns.Add(coin);
+            await _bankService.AddCoinToCollection(coin, "Returns");
+            //Returns.Add(coin);
         }
     }
 
@@ -97,7 +122,7 @@ public class VendingMachine
         return (cents / 100.0).ToString("C", _en_Us_Culture);
     }
 
-    protected virtual void DispenseProduct()
+    protected async virtual void DispenseProduct()
     {
         if (SelectedProduct != null && Stock[SelectedProduct] >= 1)
         {
@@ -105,17 +130,27 @@ public class VendingMachine
             Display = "THANK YOU";
             DispensedProduct = SelectedProduct;
             Balance -= _prices[SelectedProduct];
-            foreach (var coin in Coins)
+            var coins = await GetCoins();
+            foreach (var coin in coins)
             {
-                Bank.Add(coin);
+                await _bankService.AddCoinToCollection(coin, "Bank");
+                //Bank.Add(coin);
             }
 
-            Coins.Clear();
+            await _bankService.ClearCollection("Coins");
+            //GetCoins().Clear();
             if (Balance > 0)
             {
                 var change = GetChangeRequired(Balance);
+                await _bankService.ClearCollection("Returns");
                 Returns = change;
-                foreach (var coin in change) Bank.Remove(coin);
+                foreach (var coin in change)
+                {
+                    await _bankService.AddCoinToCollection(coin, "Returns");
+                    await _bankService.RemoveCoinFromCollection(coin, "Bank");
+                    //Bank.Remove(coin);
+                }
+
                 Balance = 0;
             }
 
@@ -128,7 +163,7 @@ public class VendingMachine
         }
     }
 
-    public virtual void Tick()
+    public virtual async void Tick()
     {
         if (Display.Contains("PRICE"))
         {
@@ -141,7 +176,8 @@ public class VendingMachine
         {
             DisplayBalance();
             DispensedProduct = null;
-            Returns = new List<int>();
+            await _bankService.ClearCollection("Returns");
+            //Returns = new List<int>();
         }
         else if (SelectedProduct != null && Balance >= _prices[SelectedProduct])
         {
@@ -154,20 +190,28 @@ public class VendingMachine
         Stock[product] = quantity;
     }
 
-    public void ReturnCoins()
+    public async void ReturnCoins()
     {
         Balance = 0;
-        Returns.AddRange(Coins);
-        Coins.Clear();
+        var coins = await GetCoins();
+        foreach (var coin in coins)
+        {
+            await _bankService.AddCoinToCollection(coin, "Returns");
+        }
+        //Returns.AddRange(GetCoins());
+        await _bankService.ClearCollection("Coins");
+        //GetCoins().Clear();
         DisplayBalance();
     }
 
-    protected bool HasChange()
+    protected async Task<bool> HasChange()
     {
+        var bank = await GetBank();
+
         return
-            Bank.Contains(25)
-            && Bank.Contains(10)
-            && Bank.Contains(5)
+            bank.Contains(25)
+            && bank.Contains(10)
+            && bank.Contains(5)
             ;
     }
 
@@ -177,11 +221,12 @@ public class VendingMachine
         return new List<int> { 10, 5 };
     }
 
-    public virtual void BankCoins(params int[] coins)
+    public async virtual void BankCoins(params int[] coins)
     {
         foreach (var coin in coins)
         {
-            Bank.Add(coin);
+            await _bankService.AddCoinToCollection(coin, "Bank");
+            //Bank.Add(coin);
         }
         DisplayBalance();
     }

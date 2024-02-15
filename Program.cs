@@ -11,6 +11,7 @@ builder.Services.Configure<VendingMachineDatabaseSettings>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 // MongoDB services
 builder.Services.AddSingleton<BankService>();
 builder.Services.AddSingleton<ProductService>();
@@ -25,6 +26,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSwaggerUI(options =>
+{
+    //options.RoutePrefix = "docs";
+
+    options.SwaggerEndpoint($"/swagger/v1/swagger.json", "v1");
+
+    var captureMock = Environment.GetEnvironmentVariable("SWAGGER_CAPTUREMOCK");
+    if (!string.IsNullOrEmpty(captureMock))
+    {
+        options.UseRequestInterceptor("(req) => { req.url = req.url.replace(/http:..localhost:[0-9]+/, '" +
+                                      captureMock + "'); return req; }");
+    }
+});
 
 
 string selectedProduct = null;
@@ -49,14 +63,14 @@ app.MapPut("/stock/{name}", (VendingMachine machine, string name, int quantity) 
 
 app.MapGet("/bank", (VendingMachine machine) =>
     {
-        return machine.Bank;
+        return machine.GetBank();
     })
     .WithName("GetBankedCoins")
     .WithOpenApi();
 
 app.MapGet("/coins", (VendingMachine machine) =>
     {
-        return machine.Coins;
+        return machine.GetCoins();
     })
     .WithName("GetInsertedCoins")
     .WithOpenApi();
@@ -71,7 +85,7 @@ app.MapPost("/coins", (VendingMachine machine, int coin) =>
 
 app.MapGet("/returns", (VendingMachine machine) =>
     {
-        return machine.Returns;
+        return machine.GetReturns();
     })
     .WithName("GetReturnedCoins")
     .WithOpenApi();
@@ -98,7 +112,7 @@ app.MapPost("/selectProduct", (VendingMachine machine, string product) =>
     .WithName("SelectProduct")
     .WithOpenApi();
 
-app.MapPost("/tick", (VendingMachine machine, string product) =>
+app.MapPost("/tick", (VendingMachine machine) =>
     {
         machine.Tick();
     })
