@@ -9,7 +9,7 @@ public class VendingMachine
     private readonly BankService _bankService;
     private readonly ProductService _productService;
     public List<int> AcceptedCoins { get; protected set; } = new() { 5, 10, 25 };
-    public List<int> Bank { get; } = new();
+
     public async Task<List<int>> GetBank()
     {
         var collection = await _bankService.GetAsync("Bank");
@@ -30,9 +30,7 @@ public class VendingMachine
     };
 
     private readonly CultureInfo _en_Us_Culture;
-    private readonly List<int> _coins = new();
 
-    public List<int> Returns { get; protected set; } = new();
     public async Task<List<int>> GetReturns()
     {
         var collection = await _bankService.GetAsync("Returns");
@@ -91,14 +89,12 @@ public class VendingMachine
         if (AcceptedCoins.Contains(coin))
         {
             await _bankService.AddCoinToCollection(coin, "Coins");
-            //GetCoins().Add(coin);
             Balance += coin;
             DisplayBalance();
         }
         else
         {
             await _bankService.AddCoinToCollection(coin, "Returns");
-            //Returns.Add(coin);
         }
     }
 
@@ -134,21 +130,17 @@ public class VendingMachine
             foreach (var coin in coins)
             {
                 await _bankService.AddCoinToCollection(coin, "Bank");
-                //Bank.Add(coin);
             }
 
             await _bankService.ClearCollection("Coins");
-            //GetCoins().Clear();
             if (Balance > 0)
             {
                 var change = GetChangeRequired(Balance);
                 await _bankService.ClearCollection("Returns");
-                Returns = change;
                 foreach (var coin in change)
                 {
                     await _bankService.AddCoinToCollection(coin, "Returns");
                     await _bankService.RemoveCoinFromCollection(coin, "Bank");
-                    //Bank.Remove(coin);
                 }
 
                 Balance = 0;
@@ -177,7 +169,6 @@ public class VendingMachine
             DisplayBalance();
             DispensedProduct = null;
             await _bankService.ClearCollection("Returns");
-            //Returns = new List<int>();
         }
         else if (SelectedProduct != null && Balance >= _prices[SelectedProduct])
         {
@@ -198,9 +189,7 @@ public class VendingMachine
         {
             await _bankService.AddCoinToCollection(coin, "Returns");
         }
-        //Returns.AddRange(GetCoins());
         await _bankService.ClearCollection("Coins");
-        //GetCoins().Clear();
         DisplayBalance();
     }
 
@@ -226,7 +215,6 @@ public class VendingMachine
         foreach (var coin in coins)
         {
             await _bankService.AddCoinToCollection(coin, "Bank");
-            //Bank.Add(coin);
         }
         DisplayBalance();
     }
