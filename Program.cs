@@ -11,6 +11,11 @@ builder.Services.Configure<VendingMachineDatabaseSettings>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// MongoDB services
+builder.Services.AddSingleton<BankService>();
+builder.Services.AddSingleton<ProductService>();
+builder.Services.AddSingleton<VendingMachine>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -25,25 +30,38 @@ if (app.Environment.IsDevelopment())
 string selectedProduct = null;
 var stock = new Dictionary<string, int> { { "Chips", 10 }, { "Candy", 10 }, { "Cola", 10 } };
 
-var machine = new VendingMachine(selectedProduct, stock);
 
-app.MapGet("/stock", () => machine.Stock)
+
+app.MapGet("/stock", (VendingMachine machine) =>
+    {
+ 
+        return machine.Stock;
+    })
     .WithName("GetStock")
     .WithOpenApi();
 
-app.MapPut("/stock/{name}", (string name, int quantity) => machine.UpdateStock(name, quantity))
+app.MapPut("/stock/{name}", (VendingMachine machine, string name, int quantity) =>
+    {
+        machine.UpdateStock(name, quantity);
+    })
     .WithName("UpdateStock")
     .WithOpenApi();
 
-app.MapGet("/bank", () => machine.Bank)
+app.MapGet("/bank", (VendingMachine machine) =>
+    {
+        return machine.Bank;
+    })
     .WithName("GetBankedCoins")
     .WithOpenApi();
 
-app.MapGet("/coins", () => machine.Coins)
+app.MapGet("/coins", (VendingMachine machine) =>
+    {
+        return machine.Coins;
+    })
     .WithName("GetInsertedCoins")
     .WithOpenApi();
 
-app.MapPost("/coins", (int coin) =>
+app.MapPost("/coins", (VendingMachine machine, int coin) =>
     {
         machine.InsertCoin(coin);
         machine.Tick();
@@ -51,19 +69,28 @@ app.MapPost("/coins", (int coin) =>
     .WithName("InsertCoin")
     .WithOpenApi();
 
-app.MapGet("/returns", () => machine.Returns)
+app.MapGet("/returns", (VendingMachine machine) =>
+    {
+        return machine.Returns;
+    })
     .WithName("GetReturnedCoins")
     .WithOpenApi();
 
-app.MapGet("/display", () => machine.Display)
+app.MapGet("/display", (VendingMachine machine) =>
+    {
+        return machine.Display;
+    })
     .WithName("GetDisplay")
     .WithOpenApi();
 
-app.MapGet("/dispenser", () => machine.DispensedProduct)
+app.MapGet("/dispenser", (VendingMachine machine) =>
+    {
+        return machine.DispensedProduct;
+    })
     .WithName("GetDispenserContents")
     .WithOpenApi();
 
-app.MapPost("/selectProduct", (string product) =>
+app.MapPost("/selectProduct", (VendingMachine machine, string product) =>
     {
         machine.SelectProduct(product);
         machine.Tick();
@@ -71,7 +98,10 @@ app.MapPost("/selectProduct", (string product) =>
     .WithName("SelectProduct")
     .WithOpenApi();
 
-app.MapPost("/tick", (string product) => machine.Tick())
+app.MapPost("/tick", (VendingMachine machine, string product) =>
+    {
+        machine.Tick();
+    })
     .WithName("Tick")
     .WithOpenApi();
 

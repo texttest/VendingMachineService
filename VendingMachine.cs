@@ -1,9 +1,13 @@
 ﻿using System.Globalization;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace VendingMachine_Logic;
 
 public class VendingMachine
 {
+    private readonly BankService _bankService;
+    private readonly ProductService _productService;
     public List<int> AcceptedCoins { get; protected set; } = new() { 5, 10, 25 };
     public List<int> Bank { get; } = new();
     public List<int> Coins { get; } = new();
@@ -20,13 +24,18 @@ public class VendingMachine
     public string? SelectedProduct { get; set; }
     public Dictionary<string, int> Stock { get; private set; }
 
-    public VendingMachine(string selectedProduct, Dictionary<string, int> stock)
+    
+
+    public VendingMachine(BankService bankService, ProductService productService)
     {
+        _bankService = bankService;
+        _productService = productService;
+
         Display = "";
         Balance = 0;
-        Stock = stock;
-        SelectedProduct = selectedProduct;
+        SelectedProduct = null;
         _en_Us_Culture = CultureInfo.CreateSpecificCulture("en-US");
+        
 
         DisplayBalance();
     }
