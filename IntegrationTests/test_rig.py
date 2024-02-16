@@ -76,6 +76,7 @@ if __name__ == "__main__":
                 wait_for_file(os.getenv("TEXTTEST_CAPTUREMOCK_RECORD"))
             else:
                 capturemock.replay_for_server(serverAddress=url)
+                time.sleep(1)
         finally:
             logging.info("stopping Vending Machine")
             process.terminate()
