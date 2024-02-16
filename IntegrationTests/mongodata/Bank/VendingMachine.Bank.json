@@ -1,7 +1,5 @@
 [{
-  "_id": {
-    "$oid": "65ce2e267f43adfc3d77d59b"
-  },
+  "_id":  "65ce2e267f43adfc3d77d59b",
   "Name": "Coins",
   "Coins": [
     5,
@@ -11,9 +9,7 @@
   ]
 },
 {
-  "_id": {
-    "$oid": "65ce2e267f43adfc3d77d59c"
-  },
+  "_id": "65ce2e267f43adfc3d77d59c",
   "Name": "Bank",
   "Coins": [
     5,
@@ -24,9 +20,7 @@
   ]
 },
 {
-  "_id": {
-    "$oid": "65ce2e267f43adfc3d77d59d"
-  },
+  "_id": "65ce2e267f43adfc3d77d59d",
   "Name": "Returns",
   "Coins": []
 }]
