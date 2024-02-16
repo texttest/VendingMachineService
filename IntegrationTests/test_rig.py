@@ -27,7 +27,7 @@ def wait_for_message(proc, ready_text):
     ready_bytes = ready_text.encode()
     for _ in range(100):
         msg_bytes = proc.stdout.readline()
-        logging.info(f"SUT: {msg_bytes.decode('utf-8')}")
+        logging.info(f"SUT: {msg_bytes.decode('utf-8').strip()}")
         if ready_bytes in msg_bytes:
             break
 
@@ -43,43 +43,44 @@ if __name__ == "__main__":
             logging.error("Failed to start mongodb")
             sys.exit(1)
 
-    port = find_available_port()
-    url = f"http://127.0.0.1:{port}"
-    db_conn_string = "mongodb://localhost:" + str(db.port)
-
-    my_env = os.environ.copy()
-    my_env["VendingMachineDatabase:ConnectionString"] = db_conn_string
-    my_env["PORT"] = str(port)
-    my_env["Kestrel:EndPoints:Http:Url"] = url
-    my_env["ASPNETCORE_URLS"] = url
-    my_env["URLS"] = url
-
-    record = capturemock.texttest_is_recording()
-    if record:
-        capturemock_env = capturemock.start_server_from_texttest(url)
-        my_env.update(capturemock_env)
-
-    texttest_home = os.path.dirname(os.environ.get("TEXTTEST_ROOT"))
-    command = ["dotnet", "run", "--project", f"{texttest_home}/VendingMachineService.csproj"]
-
-    logging.info(f"starting VendingMachine on url {url} attaching to db {db_conn_string}")
-
-    process = Popen(command, stdout=PIPE, env=my_env)
-    wait_for_message(process, "Content root path")
-    logging.info(f"VendingMachine is started")
-    try:
+        port = find_available_port()
+        url = f"http://127.0.0.1:{port}"
+        db_conn_string = "mongodb://localhost:" + str(db.port)
+    
+        my_env = os.environ.copy()
+        my_env["VendingMachineDatabase:ConnectionString"] = db_conn_string
+        my_env["PORT"] = str(port)
+        my_env["Kestrel:EndPoints:Http:Url"] = url
+        my_env["ASPNETCORE_URLS"] = url
+        my_env["URLS"] = url
+    
+        record = capturemock.texttest_is_recording()
         if record:
-            swagger_path = "/swagger/index.html"
-            logging.debug(f"Will record swagger interations on page {swagger_path}")
-            webbrowser.open_new(url + swagger_path)
-            wait_for_file(os.getenv("TEXTTEST_CAPTUREMOCK_RECORD"))
-        else:
-            capturemock.replay_for_server(serverAddress=url)
-    finally:
-        logging.info("stopping Vending Machine")
-        process.terminate()
-        capturemock.terminate()
-
-    if "TEXTTEST_DB_SETUP" in os.environ:
-        db.dump_data_directory("mongodata")
-    db.dump_changes("machine")
+            capturemock_env = capturemock.start_server_from_texttest(url)
+            my_env.update(capturemock_env)
+            logging.info(f"updating environment with CAPTUREMOCK_SERVER {capturemock_env['CAPTUREMOCK_SERVER']}")
+    
+        texttest_home = os.path.dirname(os.environ.get("TEXTTEST_ROOT"))
+        command = ["dotnet", "run", "--project", f"{texttest_home}/VendingMachineService.csproj"]
+    
+        logging.info(f"starting VendingMachine on url {url} attaching to db {db_conn_string}")
+    
+        process = Popen(command, stdout=PIPE, env=my_env)
+        wait_for_message(process, "Content root path")
+        logging.info(f"VendingMachine is started")
+        try:
+            if record:
+                swagger_path = "/swagger/index.html"
+                logging.debug(f"Will record swagger interations on page {swagger_path}")
+                webbrowser.open_new(url + swagger_path)
+                wait_for_file(os.getenv("TEXTTEST_CAPTUREMOCK_RECORD"))
+            else:
+                capturemock.replay_for_server(serverAddress=url)
+        finally:
+            logging.info("stopping Vending Machine")
+            process.terminate()
+            capturemock.terminate()
+    
+        if "TEXTTEST_DB_SETUP" in os.environ:
+            db.dump_data_directory("mongodata")
+        db.dump_changes("machine")

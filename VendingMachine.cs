@@ -19,6 +19,11 @@ public class VendingMachine
     public async Task<List<int>> GetCoins()
     {
         var collection = await _bankService.GetAsync("Coins");
+        if (collection == null)
+        {
+            await _bankService.InitVendingMachineCollections();
+            collection = await _bankService.GetAsync("Coins");
+        }
         return collection.Coins;
     }
 

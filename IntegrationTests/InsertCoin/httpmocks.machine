@@ -1,0 +1,4 @@
+<-CLI:POST /coins?coin=25 
+--HEA:accept=*/*
+->SRV:200 
+--HEA:Server=Kestrel

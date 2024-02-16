@@ -1,0 +1,12 @@
+Bank: [
+  {
+    "Coins": [
+      5,
+      25,
+      10,
+      25
+    ],
+    "Name": "Coins",
+    "_id": "65cf8470e00b5fc13a7fcbdc"
+  }
+]

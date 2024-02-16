@@ -25,24 +25,25 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    var captureMock = Environment.GetEnvironmentVariable("CAPTUREMOCK_SERVER");
+    Console.Out.WriteLine("CaptureMock environment variable " + captureMock);
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint($"/swagger/v1/swagger.json", "v1");
+
+        if (!string.IsNullOrEmpty(captureMock))
+        {
+            Console.Out.WriteLine("Setting up interceptor for CaptureMock");
+            options.UseRequestInterceptor("(req) => { req.url = req.url.replace(/http:..(127.0.0.1|localhost):[0-9]+/, '" +
+                                          captureMock + "'); return req; }");
+        }
+    });
+
     app.UseDeveloperExceptionPage();
     app.UseStaticFiles();
 }
 
-app.UseSwaggerUI(options =>
-{
-    options.RoutePrefix = "docs";
 
-    options.SwaggerEndpoint($"/swagger/v1/swagger.json", "v1");
-
-    var captureMock = Environment.GetEnvironmentVariable("SWAGGER_CAPTUREMOCK");
-    if (!string.IsNullOrEmpty(captureMock))
-    {
-        options.UseRequestInterceptor("(req) => { req.url = req.url.replace(/http:..localhost:[0-9]+/, '" +
-                                      captureMock + "'); return req; }");
-    }
-});
 
 
 string selectedProduct = null;

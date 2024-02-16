@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="IntegrationTests\mongodata\Bank\" />
+    <_ContentIncludedByDefault Remove="IntegrationTests\mongodata2\Bank\VendingMachine.Bank.json" />
   </ItemGroup>
 
 </Project>

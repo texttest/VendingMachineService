@@ -1,0 +1,6 @@
+<-CLI:GET /coins
+--HEA:accept=application/json
+->SRV:200 [5,25,10]
+--HEA:Content-Type=application/json; charset=utf-8
+--HEA:Server=Kestrel
+--HEA:Transfer-Encoding=chunked

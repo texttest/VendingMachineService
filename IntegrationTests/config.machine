@@ -18,4 +18,7 @@ import_config_file:capturemock_config
 #copy_test_path:${TEXTTEST_ROOT}/../appsettings.Development.json
 
 [run_dependent_text]
-
+stdout:SUT\:
+stdout:starting VendingMachine on url http://127.0.0.1:\d+{REPLACE port}
+stdout:attaching to db mongodb://localhost:\d+{REPLACE port}
+stdout:updating environment with CAPTUREMOCK_SERVER
