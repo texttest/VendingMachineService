@@ -53,8 +53,6 @@ public class VendingMachine
         SelectedProduct = null;
         _en_Us_Culture = CultureInfo.CreateSpecificCulture("en-US");
         
-
-        //DisplayBalance();
     }
 
     public string Display { get; protected set; }
