@@ -27,7 +27,7 @@ public class VendingMachine
         return GetCoins().Result.Sum();
     }
 
-    public virtual async Task<string> DisplayBalance()
+    public virtual async Task<string> Display()
     {
         var balance = await Balance();
         return balance != 0 ? FormatAsDollars(balance) : "INSERT COIN";

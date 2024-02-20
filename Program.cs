@@ -56,7 +56,7 @@ app.MapPut("/coins", (VendingMachine machine, int coin) =>
 
 app.MapGet("/display", (VendingMachine machine) =>
     {
-        return machine.DisplayBalance();
+        return machine.Display();
     })
     .WithName("GetDisplay")
     .WithOpenApi();
