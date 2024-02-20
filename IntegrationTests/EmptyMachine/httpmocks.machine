@@ -1,0 +1,4 @@
+<-CLI:POST /empty_machine 
+--HEA:accept=*/*
+->SRV:200 
+--HEA:Server=Kestrel

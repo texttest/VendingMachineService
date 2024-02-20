@@ -1,0 +1,6 @@
+<-CLI:GET /display
+--HEA:accept=text/plain
+->SRV:200 $0.40
+--HEA:Content-Type=text/plain; charset=utf-8
+--HEA:Server=Kestrel
+--HEA:Transfer-Encoding=chunked

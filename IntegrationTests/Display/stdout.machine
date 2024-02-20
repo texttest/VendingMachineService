@@ -1,0 +1,20 @@
+updating environment with CAPTUREMOCK_SERVER http://127.0.0.1:53621
+starting VendingMachine on url http://127.0.0.1:53620 attaching to db mongodb://localhost:53612
+SUT: Building...
+SUT: using mongo connection string mongodb://localhost:53612
+SUT: CaptureMock environment variable http://127.0.0.1:53621
+SUT: Setting up interceptor for CaptureMock
+SUT: warn: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[16]
+SUT: The WebRootPath was not found: C:\Users\Administrator\workspace\VendingMachineService\wwwroot. Static files may be unavailable.
+SUT: warn: Microsoft.AspNetCore.Server.Kestrel[0]
+SUT: Overriding address(es) 'http://127.0.0.1:53620'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+SUT: info: Microsoft.Hosting.Lifetime[14]
+SUT: Now listening on: http://127.0.0.1:53620
+SUT: info: Microsoft.Hosting.Lifetime[0]
+SUT: Application started. Press Ctrl+C to shut down.
+SUT: info: Microsoft.Hosting.Lifetime[0]
+SUT: Hosting environment: Development
+SUT: info: Microsoft.Hosting.Lifetime[0]
+SUT: Content root path: C:\Users\Administrator\workspace\VendingMachineService
+VendingMachine is started
+stopping Vending Machine
