@@ -47,7 +47,7 @@ app.MapGet("/coins", (VendingMachine machine) =>
     .WithName("GetInsertedCoins")
     .WithOpenApi();
 
-app.MapPost("/coins", (VendingMachine machine, int coin) =>
+app.MapPut("/coins", (VendingMachine machine, int coin) =>
     {
         machine.InsertCoin(coin);
     })
