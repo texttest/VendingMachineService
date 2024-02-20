@@ -18,4 +18,8 @@
     <_ContentIncludedByDefault Remove="IntegrationTests\mongodata2\Bank\VendingMachine.Bank.json" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
 </Project>

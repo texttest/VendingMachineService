@@ -42,11 +42,17 @@ public class BankService
             Console.Out.WriteLine("creating collection for Returns");
             await CreateAsync(new Bank("Returns"));
         }
+        
+        coins.Coins.Clear();
+        bank.Coins.Clear();
+        returns.Coins.Clear();
+        await UpdateAsync(coins.Id, coins);
+        await UpdateAsync(bank.Id, bank);
+        await UpdateAsync(returns.Id, returns);
     }
     
     public async Task AddCoinToCollection(int coin, string collection)
     {
-        await InitVendingMachineCollections();
         var bank = await GetAsync(collection);
         if (bank != null)
         {
@@ -65,7 +71,6 @@ public class BankService
     
     public async Task ClearCollection(string collection)
     {
-        await InitVendingMachineCollections();
         var coins = await GetAsync(collection);
         if (coins == null)
             return;
@@ -75,7 +80,6 @@ public class BankService
     
     public async Task RemoveCoinFromCollection(int coin, string name)
     {
-        await InitVendingMachineCollections();
         var coins = await GetAsync(name);
         coins?.Coins.Remove(coin);
         await UpdateAsync(coins.Id, coins);
