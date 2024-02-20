@@ -19,12 +19,6 @@ public class VendingMachine
     public async Task<List<int>> GetCoins()
     {
         var collection = await _bankService.GetAsync("Coins");
-        if (collection == null)
-        {
-            await _bankService.InitVendingMachineCollections();
-            collection = await _bankService.GetAsync("Coins");
-        }
-
         return collection.Coins;
     }
     
@@ -36,8 +30,7 @@ public class VendingMachine
     public virtual async Task<string> DisplayBalance()
     {
         var balance = await Balance();
-        var display = balance != 0 ? FormatAsDollars(balance) : "INSERT COIN";
-        return display;
+        return balance != 0 ? FormatAsDollars(balance) : "INSERT COIN";
     }
     
     protected string FormatAsDollars(int cents)

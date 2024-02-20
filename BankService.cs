@@ -57,7 +57,6 @@ public class BankService
         if (bank != null)
         {
             bank.Coins.Add(coin);
-            Console.Out.WriteLine("updating coins in " + collection + " adding " + coin + " now contains " + format(bank.Coins));
             await UpdateAsync(bank.Id, bank);
         }
         else

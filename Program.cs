@@ -24,7 +24,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     var captureMock = Environment.GetEnvironmentVariable("CAPTUREMOCK_SERVER");
-    Console.Out.WriteLine("CaptureMock environment variable " + captureMock);
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint($"/swagger/v1/swagger.json", "v1");
