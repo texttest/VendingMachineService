@@ -22,3 +22,4 @@ stdout:SUT\:
 stdout:starting VendingMachine on url http://127.0.0.1:\d+{REPLACE port}
 stdout:attaching to db mongodb://localhost:\d+{REPLACE port}
 stdout:updating environment with CAPTUREMOCK_SERVER
+stdout:Waiting for suitable server to become available
