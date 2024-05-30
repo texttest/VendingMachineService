@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     testdbname = "ttdb_" + str(os.getpid())  # some temporary name not to clash with other tests
     with dbtext.LocalMongo_DBText(data_dirname="mongodata", db_dirname=testdbname) as db:
-        db.create()
+        db.create(transactions=False)
         if not db.setup_succeeded():
             logging.error("Failed to start mongodb")
             sys.exit(1)
